@@ -9,7 +9,7 @@
         v-model:value="id"
         id="id"
         label="아이디"
-        placeholder="아이디 입력"
+        placeholder="아이디 입력 (테스트용: test)"
         type="text"
         :errorLabel="idErrorLabel"
       />
@@ -17,7 +17,7 @@
         v-model:value="password"
         id="password"
         label="비밀번호"
-        placeholder="비밀번호 입력"
+        placeholder="비밀번호 입력 (테스트용: 1234)"
         type="password"
         @event="signin"
         :errorLabel="passwordErrorLabel"
@@ -32,8 +32,12 @@
 
     <section class="social flex flex-col gap-y-3 mt-4 px-6">
       <h2 class="block text-start font-bold text-sm">회원 가입</h2>
-      <div class="flex justify-center items-center gap-x-3 rounded-xl bg-blue-600 h-12 cursor-pointer">
-        <span class="text-base font-semibold">핸드폰 본인인증</span>
+      <div
+        class="flex justify-center items-center gap-x-3 rounded-xl bg-blue-600 h-12 cursor-pointer"
+        @click="$router.push('/signup')"
+      >
+        <!-- <span class="text-base font-semibold">핸드폰 본인인증</span> -->
+        <span class="text-base font-semibold">회원가입</span>
       </div>
     </section>
 

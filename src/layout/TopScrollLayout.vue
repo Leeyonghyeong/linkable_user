@@ -1,12 +1,12 @@
 <template>
   <TitleHeader />
   <RouterView />
-  <Footer />
+  <TopScrollFooter />
 </template>
 
 <script lang="ts" setup>
 import TitleHeader from '@/components/TitleHeader.vue'
-import Footer from '@/components/Footer.vue'
+import TopScrollFooter from '@/components/TopScrollFooter.vue'
 import { RouterView } from 'vue-router'
 </script>
 

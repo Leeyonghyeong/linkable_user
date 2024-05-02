@@ -1,19 +1,8 @@
+@import './style/variables.css';
+@import './style/alert.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --color-bg-primary: #242424;
-    --font-default-color: 255, 255, 255, 0.85;
-    --font-black-color: 0, 0, 0, 0.85;
-
-    --primary: #FDB811;
-    --white: #ffffff;
-    --black: #000000;
-    --error: #ef4444;
-  }
-}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -32,6 +21,21 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
+
+::-webkit-scrollbar {
+  width: 0px;  
+}
+
+::-webkit-scrollbar-thumb {
+  outline: none;
+  border-radius: 0px;
+  box-shadow: inset 0px 0px 0 gray;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: none;
+  background-color: transparent;
 }
 
 a {
@@ -94,22 +98,23 @@ main {
   width: 100%;
   flex: 1;
   overflow-y: auto;
+  padding: 24px 0;
 }
 
-::-webkit-scrollbar {
+/* main::-webkit-scrollbar {
   width: 4px;  
 }
 
-::-webkit-scrollbar-thumb {
+main::-webkit-scrollbar-thumb {
   outline: none;
   border-radius: 50px;
   box-shadow: inset 6px 6px 0 gray;
 }
 
-::-webkit-scrollbar-track {
+main::-webkit-scrollbar-track {
   box-shadow: none;
   background-color: transparent;
-}
+} */
 
 @media screen and (min-width: 768px) {
   #app {

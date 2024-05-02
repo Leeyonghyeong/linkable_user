@@ -1,0 +1,16 @@
+@layer base {
+  :root {
+    --color-bg-primary: #242424;
+    --font-default-color: 255, 255, 255, 0.85;
+    --font-black-color: 0, 0, 0, 0.85;
+    
+    --primary: #FDB811;
+    --white: #ffffff;
+    --black: #000000;
+    --error: #ef4444;
+    
+    --toast-success-bg: 0, 255, 0, 0.4;
+    --toast-warning-bg: 255, 255, 0, 0.4;
+    --toast-error-bg: 255, 0, 0, 0.4;
+  }
+}
