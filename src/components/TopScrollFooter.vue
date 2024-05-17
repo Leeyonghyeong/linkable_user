@@ -45,7 +45,7 @@
         <span
           class="text-xs"
           :class="{ 'text-black': $route.path !== '/tournament', 'text-primary': $route.path === '/tournament' }"
-          >대회정보</span
+          >장터</span
         >
       </div>
 
