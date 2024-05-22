@@ -10,7 +10,7 @@
       :class="{ 'ring-error': errorLabel, 'ring-primary': !errorLabel }"
       :placeholder="placeholder"
       :disabled="disabled"
-      autocomplete="off"
+      :autocomplete="autocomplete || 'off'"
       @input="$emit('update:value', ($event.target as HTMLInputElement).value)"
       @keypress.enter="$emit('event')"
     />
@@ -28,6 +28,7 @@ defineProps<{
   errorLabel: string
   flex?: boolean
   disabled?: boolean
+  autocomplete?: string
 }>()
 
 defineEmits<{

@@ -6,21 +6,21 @@
 
     <section class="input-box flex flex-col gap-y-4 mt-12 px-6 flex-1">
       <InputLabel
-        v-model:value="email"
-        id="email"
+        v-model:value="id"
+        id="id"
         label="아이디"
         placeholder="아이디 입력"
         type="text"
-        :errorLabel="emailErrorLabel"
+        :errorLabel="idErrorLabel"
       />
 
       <InputLabel
-        v-model:value="name"
+        v-model:value="userName"
         id="name"
         label="이름"
         placeholder="이름 입력"
         type="text"
-        :errorLabel="nameErrorLabel"
+        :errorLabel="userNameErrorLabel"
       />
 
       <div class="info bg-gray-200 rounded-md text-gray-700 text-left p-2 text-xs">
@@ -30,7 +30,7 @@
 
       <div class="phone flex gap-x-2 items-end justify-between">
         <InputLabel
-          v-model:value="phone"
+          v-model:value="phoneNumber"
           id="phone"
           label="전화번호"
           placeholder="전화번호 입력 (ex 01012345678)"
@@ -58,6 +58,7 @@
           errorLabel=""
           :flex="true"
           :disabled="isVerifyNumber"
+          autocomplete="one-time-code"
         />
 
         <button
@@ -100,7 +101,12 @@
 
   <footer class="py-3">
     <section class="submit px-6">
-      <div class="bg-primary text-font-black rounded-lg h-12 flex justify-center items-center font-bold">완료</div>
+      <div
+        class="bg-primary text-font-black rounded-lg h-12 flex justify-center items-center font-bold"
+        @click="submit"
+      >
+        완료
+      </div>
     </section>
   </footer>
 </template>
@@ -108,14 +114,19 @@
 <script lang="ts" setup>
 import InputLabel from '@/components/common/InputLabel.vue'
 import Logo from '@/components/common/Logo.vue'
-import { toastAlert } from '@/function/alert'
+import { confirmAlert, toastAlert } from '@/function/alert'
 import { ref } from 'vue'
+import api from '@/config/axios.config'
+import { AccessTokenResponse, BooleanReturnResponse, CommonResponse } from '@/types/response'
+import { useRouter } from 'vue-router'
 
-const email = ref<string>('')
-const emailErrorLabel = ref<string>('')
-const name = ref<string>('')
-const nameErrorLabel = ref<string>('')
-const phone = ref<string>('')
+const router = useRouter()
+
+const id = ref<string>('')
+const idErrorLabel = ref<string>('')
+const userName = ref<string>('')
+const userNameErrorLabel = ref<string>('')
+const phoneNumber = ref<string>('')
 const phoneVerifyNumber = ref<string>('')
 const nickName = ref<string>('')
 const nickNameErrorLabel = ref<string>('')
@@ -127,8 +138,40 @@ const rePasswordErrorLabel = ref<string>('')
 const isModifyPhone = ref<boolean>(false)
 const isVerifyNumber = ref<boolean>(false)
 
-const phoneVerifyHandler = () => {
-  if (!phone.value) {
+const checkExistId = async (): Promise<boolean> => {
+  const { data } = await api.get<BooleanReturnResponse>(`/member/id-check?checkItem=${id.value}`)
+
+  if (data.success) {
+    return data.data
+  } else {
+    toastAlert({
+      text: data.errorMessage,
+      type: 'error',
+      position: 'top',
+    })
+
+    return true
+  }
+}
+
+const checkExistNickName = async (): Promise<boolean> => {
+  const { data } = await api.get<BooleanReturnResponse>(`/member/nickname-check?checkItem=${nickName.value}`)
+
+  if (data.success) {
+    return data.data
+  } else {
+    toastAlert({
+      text: data.errorMessage,
+      type: 'error',
+      position: 'top',
+    })
+
+    return true
+  }
+}
+
+const phoneVerifyHandler = async () => {
+  if (!phoneNumber.value) {
     toastAlert({
       text: '전화번호를 입력해 주세요',
       type: 'warning',
@@ -138,15 +181,38 @@ const phoneVerifyHandler = () => {
     return
   }
 
-  const phoneRegex = /^(01[016789]{1})?[0-9]{3,4}?[0-9]{4}$/
+  if (!isModifyPhone.value) {
+    const phoneRegex = /^(01[016789]{1})?[0-9]{3,4}?[0-9]{4}$/
 
-  if (!phoneRegex.test(phone.value)) {
-    toastAlert({
-      text: '전화번호 형식이 유효하지 않습니다',
-      type: 'error',
-      position: 'top',
-    })
-    return
+    if (!phoneRegex.test(phoneNumber.value)) {
+      toastAlert({
+        text: '전화번호 형식이 유효하지 않습니다',
+        type: 'error',
+        position: 'top',
+      })
+
+      return
+    } else {
+      const { data } = await api.post<CommonResponse>('/member/send/sms/verify', {
+        phoneNumber: phoneNumber.value,
+      })
+
+      if (data.success) {
+        toastAlert({
+          text: '인증번호가 발송 되었습니다',
+          type: 'success',
+          position: 'top',
+        })
+      } else {
+        toastAlert({
+          text: data.errorMessage,
+          type: 'error',
+          position: 'top',
+        })
+
+        return
+      }
+    }
   }
 
   isVerifyNumber.value = false
@@ -154,7 +220,7 @@ const phoneVerifyHandler = () => {
   isModifyPhone.value = !isModifyPhone.value
 }
 
-const phoneVerifyNumberHandler = () => {
+const phoneVerifyNumberHandler = async () => {
   if (!phoneVerifyNumber.value) {
     toastAlert({
       text: '인증번호를 입력해 주세요',
@@ -165,23 +231,110 @@ const phoneVerifyNumberHandler = () => {
     return
   }
 
-  if (phoneVerifyNumber.value !== '1234') {
+  const { data } = await api.post<CommonResponse>('/member/verify-check', {
+    phoneNumber: phoneNumber.value,
+    verifyNumber: phoneVerifyNumber.value,
+  })
+
+  if (data.success) {
     toastAlert({
-      text: '인증번호가 올바르지 않습니다',
+      text: '인증 되었습니다',
+      type: 'success',
+      position: 'top',
+    })
+
+    isVerifyNumber.value = true
+
+    return
+  } else {
+    toastAlert({
+      text: data.errorMessage,
       type: 'error',
       position: 'top',
     })
 
     return
-  } else {
+  }
+}
+
+const submit = async () => {
+  if (
+    !id.value ||
+    !userName.value ||
+    !phoneNumber.value ||
+    !phoneVerifyNumber.value ||
+    !nickName.value ||
+    !password.value ||
+    !rePassword.value
+  ) {
     toastAlert({
-      text: '인증되었습니다',
-      type: 'success',
+      text: '모든 항목을 입력해 주세요',
+      type: 'warning',
       position: 'top',
     })
+
+    return
   }
 
-  isVerifyNumber.value = true
+  if (await checkExistId()) {
+    toastAlert({
+      text: '이미 사용중인 아이디 입니다',
+      type: 'error',
+      position: 'top',
+    })
+
+    return
+  }
+
+  if (await checkExistNickName()) {
+    toastAlert({
+      text: '이미 사용중인 닉네임 입니다',
+      type: 'error',
+      position: 'top',
+    })
+
+    return
+  }
+
+  if (!isVerifyNumber.value) {
+    toastAlert({
+      text: '전화번호 인증이 완료되지 않았습니다',
+      type: 'error',
+      position: 'top',
+    })
+
+    return
+  }
+
+  const requestData = {
+    id: id.value,
+    userName: userName.value,
+    phoneNumber: phoneNumber.value,
+    nickName: nickName.value,
+    password: password.value,
+  }
+
+  const { data } = await api.post<AccessTokenResponse>('/member/signup', requestData)
+
+  if (data.success) {
+    const alert = await confirmAlert({
+      title: '회원가입 완료',
+      text: '회원가입이 완료 되었습니다',
+      isCancelButton: false,
+    })
+
+    if (alert.isConfirmed) {
+      router.replace('/')
+    }
+  } else {
+    toastAlert({
+      text: data.errorMessage,
+      type: 'error',
+      position: 'top',
+    })
+
+    return
+  }
 }
 </script>
 
